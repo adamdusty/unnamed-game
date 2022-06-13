@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.23)
+
+project(
+    sdk
+    VERSION 0.0.1
+)
+
+add_library(sdk
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ecs.cpp
+)
+
+target_link_libraries(sdk PUBLIC EnTT::EnTT)
+
+target_include_directories(sdk
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_compile_options(sdk INTERFACE -Wall -Wextra -Wconversion)
