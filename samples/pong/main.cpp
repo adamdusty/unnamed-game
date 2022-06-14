@@ -15,10 +15,12 @@ struct Input {
 };
 
 auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<const Input, Position>();
+    auto view = reg.view<Input, Position>();
 
     for(auto [entity, input, pos]: view.each()) {
-        if(std::find(input.keys.begin(), input.keys.end(), SDLK_w) != input.keys.end()) {
+        auto key = std::find(input.keys.begin(), input.keys.end(), SDLK_w);
+        if(key != input.keys.end()) {
+            input.keys.erase(key);
             pos.y += 1;
 
             std::cout << pos.y << std::endl;
@@ -46,12 +48,20 @@ auto input_system(entt::registry &reg, int *quit) -> void {
     }
 }
 
+auto create_paddle(entt::registry &reg, float x, float y) -> entt::entity {
+    auto ent = reg.create();
+    reg.emplace<Position>(ent, x, y);
+}
+
 auto main() -> int {
     auto t0 = std::chrono::high_resolution_clock::now();
     auto t1 = std::chrono::high_resolution_clock::now();
     auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
     auto reg = entt::registry{};
+    auto inp = reg.create();
+    reg.emplace<Position>(inp);
+    reg.emplace<Input>(inp);
 
     SDL_Init(SDL_INIT_VIDEO);
     auto window =
