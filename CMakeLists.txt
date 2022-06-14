@@ -20,5 +20,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/entt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sdk)
 
+add_subdirectory(samples)
+
 # enable_testing()
 # add_subdirectory(tests)
