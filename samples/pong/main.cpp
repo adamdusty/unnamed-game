@@ -1,9 +1,15 @@
 #include <chrono>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 #include "SDL.h"
 #include "entt/entt.hpp"
+
+struct Velocity {
+    float x;
+    float y;
+};
 
 struct Position {
     float x;
@@ -11,7 +17,12 @@ struct Position {
 };
 
 struct Input {
-    std::vector<SDL_KeyCode> keys;
+    std::vector<SDL_Scancode> keys_down;
+    std::vector<SDL_Scancode> keys_up;
+};
+
+struct Player {
+    std::array<float, 2> axis_input;
 };
 
 struct DrawInfo {
@@ -19,35 +30,45 @@ struct DrawInfo {
 };
 
 auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Input, Position>();
+    auto view = reg.view<Position, Velocity>();
 
-    for(auto [entity, input, pos]: view.each()) {
-        auto key = std::find(input.keys.begin(), input.keys.end(), SDLK_w);
-        if(key != input.keys.end()) {
-            input.keys.erase(key);
-            pos.y += 1;
-
-            std::cout << pos.y << std::endl;
+    for(auto [entity, pos, vel]: view.each()) {
+        if(vel.y != 0) {
+            std::cout << vel.y << '\n';
         }
+        pos.x += vel.x * 250 * dt;
+        pos.y += vel.y * 250 * dt;
     }
 }
 
-auto input_system(entt::registry &reg, int *quit) -> void {
-    auto view = reg.view<Input>();
-    SDL_Event ev{};
-    if(SDL_PollEvent(&ev)) {
-        switch(ev.type) {
-        case SDL_QUIT:
-            *quit = -1;
-        case SDL_KEYDOWN:
-            for(auto e: view) {
-                auto &input = view.get<Input>(e);
-                input.keys.emplace_back((SDL_KeyCode)ev.key.keysym.sym);
+auto player_input_system(entt::registry &reg, const Input input) -> void {
+    auto view = reg.view<Player, Velocity>();
+
+    for(auto [e, p, v]: view.each()) {
+        for(auto k: input.keys_down) {
+            switch(k) {
+            case SDL_SCANCODE_W:
+                v.y = -1;
+                break;
+            case SDL_SCANCODE_S:
+                v.y = 1;
+                break;
+            default:
+                break;
             }
-            if(ev.key.keysym.sym == SDLK_ESCAPE) {
-                *quit = -1;
+        }
+
+        for(auto k: input.keys_up) {
+            switch(k) {
+            case SDL_SCANCODE_W:
+                v.y = 0;
+                break;
+            case SDL_SCANCODE_S:
+                v.y = 0;
+                break;
+            default:
+                break;
             }
-            break;
         }
     }
 }
@@ -76,15 +97,21 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
 auto create_paddle(entt::registry &reg, float x, float y) -> entt::entity {
     auto ent = reg.create();
     reg.emplace<Position>(ent, x, y);
-    reg.emplace<DrawInfo>(ent, 10, 40);
+    reg.emplace<Velocity>(ent, 0.0f, 0.0f);
+    reg.emplace<DrawInfo>(ent, 10, 256);
 
     return ent;
 }
 
+auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
+    movement_system(reg, dt);
+    render_system(reg, rend);
+}
+
 auto main() -> int {
-    auto t0 = std::chrono::high_resolution_clock::now();
-    auto t1 = std::chrono::high_resolution_clock::now();
-    auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+    auto t0  = std::chrono::high_resolution_clock::now();
+    auto t1  = std::chrono::high_resolution_clock::now();
+    float dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
     auto reg = entt::registry{};
 
@@ -95,22 +122,43 @@ auto main() -> int {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
 
-    create_paddle(reg, w * 0.1, h / 2);
+    auto p = create_paddle(reg, w * 0.1, h / 2);
+    reg.emplace<Player>(p);
+
     create_paddle(reg, w * 0.9, h / 2);
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    int quit = 0;
+    bool quit = false;
+    SDL_Event ev{};
+    Input input{};
 
     while(!quit) {
         t0 = std::chrono::high_resolution_clock::now();
-        dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
-        input_system(reg, &quit);
-        movement_system(reg, dt);
-        render_system(reg, renderer);
+        while(SDL_PollEvent(&ev)) {
+            switch(ev.type) {
+            case SDL_QUIT:
+                quit = true;
+            case SDL_KEYDOWN:
+                if(ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                    quit = true;
+                input.keys_down.emplace_back(ev.key.keysym.scancode);
+                break;
+            case SDL_KEYUP:
+                input.keys_up.emplace_back(ev.key.keysym.scancode);
+                break;
+            }
+            player_input_system(reg, input);
+            input.keys_up.clear();
+            input.keys_down.clear();
+        }
+        run_systems(reg, dt, renderer);
 
         t1 = std::chrono::high_resolution_clock::now();
+        dt = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
+        // dt /= 1000000.0;
+        dt *= 0.000001;
     }
 
     SDL_DestroyRenderer(renderer);
