@@ -1,117 +1,35 @@
 #include <chrono>
 #include <iostream>
-#include <optional>
-#include <vector>
 
 #include "SDL.h"
+#include "box2d/box2d.h"
+#include "comp.hpp"
 #include "entt/entt.hpp"
+#include "factories.hpp"
+#include "sys.hpp"
 
-struct Velocity {
-    float x;
-    float y;
-};
-
-struct Position {
-    float x;
-    float y;
-};
-
-struct Input {
-    std::vector<SDL_Scancode> keys_down;
-    std::vector<SDL_Scancode> keys_up;
-};
-
-struct Player {
-    std::array<float, 2> axis_input;
-};
-
-struct DrawInfo {
-    std::array<int32_t, 2> quad;
-};
-
-auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Position, Velocity>();
-
-    for(auto [entity, pos, vel]: view.each()) {
-        if(vel.y != 0) {
-            std::cout << vel.y << '\n';
-        }
-        pos.x += vel.x * 250 * dt;
-        pos.y += vel.y * 250 * dt;
-    }
-}
-
-auto player_input_system(entt::registry &reg, const Input input) -> void {
-    auto view = reg.view<Player, Velocity>();
-
-    for(auto [e, p, v]: view.each()) {
-        for(auto k: input.keys_down) {
-            switch(k) {
-            case SDL_SCANCODE_W:
-                v.y = -1;
-                break;
-            case SDL_SCANCODE_S:
-                v.y = 1;
-                break;
-            default:
-                break;
-            }
-        }
-
-        for(auto k: input.keys_up) {
-            switch(k) {
-            case SDL_SCANCODE_W:
-                v.y = 0;
-                break;
-            case SDL_SCANCODE_S:
-                v.y = 0;
-                break;
-            default:
-                break;
-            }
-        }
-    }
-}
-
-auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
-    auto view = reg.view<DrawInfo, Position>();
-
-    SDL_RenderClear(rend);
-
-    SDL_Rect rect{};
-
-    for(auto [e, d, p]: view.each()) {
-        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-
-        rect.w = d.quad.at(0);
-        rect.h = d.quad.at(1);
-        rect.x = p.x;
-        rect.y = p.y;
-        SDL_RenderFillRect(rend, &rect);
-        SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-    }
-
-    SDL_RenderPresent(rend);
-}
-
-auto create_paddle(entt::registry &reg, float x, float y) -> entt::entity {
-    auto ent = reg.create();
-    reg.emplace<Position>(ent, x, y);
-    reg.emplace<Velocity>(ent, 0.0f, 0.0f);
-    reg.emplace<DrawInfo>(ent, 10, 256);
-
-    return ent;
-}
+namespace pong {
 
 auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
+    physics_system(reg, dt);
     movement_system(reg, dt);
     render_system(reg, rend);
 }
+
+auto register_services() -> void {
+    entt::locator<b2World>::emplace(b2Vec2(0.0f, 0.0f));
+}
+
+} // namespace pong
+
+using namespace pong;
 
 auto main() -> int {
     auto t0  = std::chrono::high_resolution_clock::now();
     auto t1  = std::chrono::high_resolution_clock::now();
     float dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+
+    register_services();
 
     auto reg = entt::registry{};
 
@@ -122,10 +40,11 @@ auto main() -> int {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
 
+    create_paddle(reg, w * 0.9, h / 2);
     auto p = create_paddle(reg, w * 0.1, h / 2);
     reg.emplace<Player>(p);
 
-    create_paddle(reg, w * 0.9, h / 2);
+    auto ball = create_ball(reg, w / 2.0f, h / 2.0f);
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -140,6 +59,8 @@ auto main() -> int {
             switch(ev.type) {
             case SDL_QUIT:
                 quit = true;
+            case SDL_WINDOWEVENT:
+                break;
             case SDL_KEYDOWN:
                 if(ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
                     quit = true;
@@ -157,11 +78,11 @@ auto main() -> int {
 
         t1 = std::chrono::high_resolution_clock::now();
         dt = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
-        // dt /= 1000000.0;
         dt *= 0.000001;
     }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    return 0;
 }

@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/entt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/box2d)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sdk)
 
 add_subdirectory(samples)
