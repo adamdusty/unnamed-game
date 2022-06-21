@@ -8,11 +8,6 @@
 #include <memory>
 #include <vector>
 
-struct Velocity {
-    float x;
-    float y;
-};
-
 struct Position {
     float x;
     float y;
@@ -21,6 +16,11 @@ struct Position {
 struct Input {
     std::vector<SDL_Scancode> keys_down;
     std::vector<SDL_Scancode> keys_up;
+
+    auto clear() -> void {
+        keys_down.clear();
+        keys_up.clear();
+    }
 };
 
 struct Player {

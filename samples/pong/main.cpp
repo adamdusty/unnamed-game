@@ -11,6 +11,9 @@
 namespace pong {
 
 auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
+    input_system(reg, dt);
+    player_input_system(reg, dt);
+    player_control_system(reg, dt);
     physics_system(reg, dt);
     movement_system(reg, dt);
     render_system(reg, rend);
@@ -43,6 +46,7 @@ auto main() -> int {
     create_paddle(reg, w * 0.9, h / 2);
     auto p = create_paddle(reg, w * 0.1, h / 2);
     reg.emplace<Player>(p);
+    reg.emplace<Input>(p);
 
     auto ball = create_ball(reg, w / 2.0f, h / 2.0f);
 
@@ -55,25 +59,25 @@ auto main() -> int {
     while(!quit) {
         t0 = std::chrono::high_resolution_clock::now();
 
-        while(SDL_PollEvent(&ev)) {
-            switch(ev.type) {
-            case SDL_QUIT:
-                quit = true;
-            case SDL_WINDOWEVENT:
-                break;
-            case SDL_KEYDOWN:
-                if(ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-                    quit = true;
-                input.keys_down.emplace_back(ev.key.keysym.scancode);
-                break;
-            case SDL_KEYUP:
-                input.keys_up.emplace_back(ev.key.keysym.scancode);
-                break;
-            }
-            player_input_system(reg, input);
-            input.keys_up.clear();
-            input.keys_down.clear();
-        }
+        // while(SDL_PollEvent(&ev)) {
+        //     switch(ev.type) {
+        //     case SDL_QUIT:
+        //         quit = true;
+        //     case SDL_WINDOWEVENT:
+        //         break;
+        //     case SDL_KEYDOWN:
+        //         if(ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+        //             quit = true;
+        //         input.keys_down.emplace_back(ev.key.keysym.scancode);
+        //         break;
+        //     case SDL_KEYUP:
+        //         input.keys_up.emplace_back(ev.key.keysym.scancode);
+        //         break;
+        //     }
+        //     player_input_system(reg, input);
+        //     input.keys_up.clear();
+        //     input.keys_down.clear();
+        // }
         run_systems(reg, dt, renderer);
 
         t1 = std::chrono::high_resolution_clock::now();

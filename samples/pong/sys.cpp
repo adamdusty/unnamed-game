@@ -1,39 +1,53 @@
 #include "sys.hpp"
 
+#include <iostream>
+
 namespace pong {
 auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Position, Velocity>();
+    auto view = reg.view<Position, PhysicsComponent>();
 
-    for(auto [entity, pos, vel]: view.each()) {
-        pos.x += vel.x * 500 * dt;
-        pos.y += vel.y * 500 * dt;
+    for(auto [entity, pos, phy]: view.each()) {
+        // pos.x += vel.x * 500 * dt;
+        // pos.y += vel.y * 500 * dt;
+
+        pos.x = phy.body->GetPosition().x;
+        pos.y = phy.body->GetPosition().y;
+    }
+}
+auto player_control_system(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<Player, PhysicsComponent>();
+
+    for(auto [e, player, phys]: view.each()) {
+        b2Vec2 vel{0.0f, player.axis_input.at(1) * (4096 / 32)};
+        phys.body->SetLinearVelocity(vel);
     }
 }
 
-auto player_input_system(entt::registry &reg, const Input input) -> void {
-    auto view = reg.view<Player, Velocity>();
+auto player_input_system(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<Player, Input>();
 
-    for(auto [e, p, v]: view.each()) {
-        for(auto k: input.keys_up) {
+    for(auto [e, p, i]: view.each()) {
+        for(auto k: i.keys_down) {
             switch(k) {
             case SDL_SCANCODE_W:
-                v.y = 0;
+                p.axis_input.at(1) = -1;
                 break;
             case SDL_SCANCODE_S:
-                v.y = 0;
+                p.axis_input.at(1) = 1;
                 break;
             default:
                 break;
             }
         }
-
-        for(auto k: input.keys_down) {
+        for(auto k: i.keys_up) {
             switch(k) {
             case SDL_SCANCODE_W:
-                v.y = -1;
+                if(p.axis_input.at(1) == -1)
+                    p.axis_input.at(1) = 0;
                 break;
             case SDL_SCANCODE_S:
-                v.y = 1;
+                if(p.axis_input.at(1) == 1)
+                    p.axis_input.at(1) = 0;
                 break;
             default:
                 break;
@@ -43,7 +57,7 @@ auto player_input_system(entt::registry &reg, const Input input) -> void {
 }
 
 auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
-    auto view = reg.view<DrawInfo, PhysicsComponent>();
+    auto view = reg.view<DrawInfo, Position>();
 
     SDL_RenderClear(rend);
 
@@ -54,8 +68,8 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
 
         rect.w = d.quad.at(0);
         rect.h = d.quad.at(1);
-        rect.x = p.body->GetPosition().x;
-        rect.y = p.body->GetPosition().y;
+        rect.x = p.x;
+        rect.y = p.y;
         SDL_RenderFillRect(rend, &rect);
         SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
     }
@@ -73,6 +87,30 @@ auto physics_system(entt::registry &reg, float dt) -> void {
     for(auto [e, pos, phy]: view.each()) {
         pos.x = phy.body->GetPosition().x;
         pos.y = phy.body->GetPosition().y;
+    }
+}
+
+auto input_system(entt::registry &reg, float dt) -> void {
+    static SDL_Event ev{};
+
+    auto view = reg.view<Input>();
+
+    for(auto [e, i]: view.each()) {
+        i.clear();
+        while(SDL_PollEvent(&ev)) {
+            switch(ev.type) {
+            case SDL_KEYDOWN:
+                if(ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                    std::exit(0);
+                i.keys_down.emplace_back(ev.key.keysym.scancode);
+                break;
+            case SDL_KEYUP:
+                i.keys_up.emplace_back(ev.key.keysym.scancode);
+                break;
+            default:
+                break;
+            }
+        }
     }
 }
 
