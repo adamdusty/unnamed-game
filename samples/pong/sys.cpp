@@ -6,11 +6,10 @@
 namespace pong {
 
 auto player_control_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Player, PhysicsComponent>();
+    auto view = reg.view<Player, Velocity>();
 
-    for(auto [e, player, phys]: view.each()) {
-        b2Vec2 vel{0.0f, player.axis_input.at(1) * 100 * 32};
-        phys.body->SetLinearVelocity(vel);
+    for(auto [e, p, v]: view.each()) {
+        v.y = p.axis_input.at(1) * 256;
     }
 }
 
@@ -48,7 +47,7 @@ auto player_input_system(entt::registry &reg, float dt) -> void {
 }
 
 auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
-    auto view = reg.view<DrawInfo, PhysicsComponent>();
+    auto view = reg.view<DrawInfo, Position>();
 
     SDL_RenderClear(rend);
 
@@ -57,10 +56,10 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
     for(auto [e, d, p]: view.each()) {
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
 
-        rect.w = d.quad.at(0) * 32.0f;
-        rect.h = d.quad.at(1) * 32.0f;
-        rect.x = p.body->GetPosition().x; // * 120.0f;
-        rect.y = p.body->GetPosition().y; // * 120.0f;
+        rect.w = d.quad.at(0);
+        rect.h = d.quad.at(1);
+        rect.x = p.x;
+        rect.y = p.y;
         SDL_RenderFillRect(rend, &rect);
         SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
     }
@@ -68,11 +67,7 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
     SDL_RenderPresent(rend);
 }
 
-auto physics_system(entt::registry &reg, float dt) -> void {
-    if(entt::locator<b2World>::has_value()) {
-        entt::locator<b2World>::value().Step(dt, 8, 3);
-    }
-}
+auto physics_system(entt::registry &reg, float dt) -> void {}
 
 auto input_system(entt::registry &reg, float dt) -> void {
     static SDL_Event ev{};
@@ -97,6 +92,15 @@ auto input_system(entt::registry &reg, float dt) -> void {
                 break;
             }
         }
+    }
+}
+
+auto movement_system(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<Position, Velocity>();
+
+    for(auto [e, p, v]: view.each()) {
+        p.x += v.x * dt;
+        p.y += v.y * dt;
     }
 }
 

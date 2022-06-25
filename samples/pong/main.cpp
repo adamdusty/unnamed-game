@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include "SDL.h"
-#include "box2d/box2d.h"
 #include "comp.hpp"
 #include "entt/entt.hpp"
 #include "factories.hpp"
@@ -14,12 +13,12 @@ auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
     input_system(reg, dt);
     player_input_system(reg, dt);
     player_control_system(reg, dt);
-    physics_system(reg, dt);
+    movement_system(reg, dt);
     render_system(reg, rend);
 }
 
 auto register_services() -> void {
-    entt::locator<b2World>::emplace(b2Vec2(0.0f, 0.0f));
+    // entt::locator<b2World>::emplace(b2Vec2(0.0f, 0.0f));
 }
 
 } // namespace pong
