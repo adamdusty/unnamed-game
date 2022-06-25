@@ -7,7 +7,7 @@ namespace pong {
 
 auto create_paddle(entt::registry &reg, float x, float y) -> entt::entity {
     auto ent = reg.create();
-    reg.emplace<DrawInfo>(ent, 10, 256);
+    reg.emplace<DrawInfo>(ent, 32 / 32.0f, 256 / 32.0f);
 
     b2BodyDef body_def{};
     body_def.type = b2_dynamicBody;
@@ -29,7 +29,7 @@ auto create_paddle(entt::registry &reg, float x, float y) -> entt::entity {
 
 auto create_ball(entt::registry &reg, float x, float y) -> entt::entity {
     auto ent = reg.create();
-    reg.emplace<DrawInfo>(ent, 32, 32);
+    reg.emplace<DrawInfo>(ent, 32 / 32.0f, 32 / 32.0f);
 
     b2BodyDef body_def{};
     body_def.type = b2_dynamicBody;

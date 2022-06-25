@@ -28,7 +28,7 @@ struct Player {
 };
 
 struct DrawInfo {
-    std::array<int32_t, 2> quad;
+    std::array<float, 2> quad;
 };
 
 struct PhysicsComponent {
