@@ -10,5 +10,7 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void;
 auto input_system(entt::registry &reg, float dt) -> void;
 auto player_control_system(entt::registry &reg, float dt) -> void;
 auto movement_system(entt::registry &reg, float dt) -> void;
+auto collision_system(entt::registry &reg, float dt) -> void;
+auto debug_system(entt::registry &reg, float dt) -> void;
 
 } // namespace pong

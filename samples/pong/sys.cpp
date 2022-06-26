@@ -1,12 +1,29 @@
 #include "sys.hpp"
 
+#include "collision.hpp"
+#include "fmt/format.h"
 #include <chrono>
 #include <iostream>
 
 namespace pong {
 
+auto debug_system(entt::registry &reg, float) -> void {
+    auto view = reg.view<Debug, PolygonCollider, Position>();
+
+    // for(auto e: view) {
+    //     auto &col = view.get<PolygonCollider>(e);
+    //     auto &pos = view.get<Position>(e);
+
+    //     fmt::print("POSITION: ({}, {})\n", pos.x, pos.y);
+    //     for(auto &p: col.points) {
+    //         Point adj{p.x + pos.x, p.y + pos.y};
+    //         fmt::print("POINT: ({}, {})\n", adj.x, adj.y);
+    //     }
+    // }
+}
+
 auto player_control_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Player, Velocity>();
+    auto view = reg.view<const Player, Velocity>();
 
     for(auto [e, p, v]: view.each()) {
         v.y = p.axis_input.at(1) * 256;
@@ -47,7 +64,7 @@ auto player_input_system(entt::registry &reg, float dt) -> void {
 }
 
 auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
-    auto view = reg.view<DrawInfo, Position>();
+    auto view = reg.view<const DrawInfo, const Position>();
 
     SDL_RenderClear(rend);
 
@@ -56,8 +73,8 @@ auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
     for(auto [e, d, p]: view.each()) {
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
 
-        rect.w = d.quad.at(0);
-        rect.h = d.quad.at(1);
+        rect.w = d.width;
+        rect.h = d.height;
         rect.x = p.x;
         rect.y = p.y;
         SDL_RenderFillRect(rend, &rect);
@@ -96,11 +113,27 @@ auto input_system(entt::registry &reg, float dt) -> void {
 }
 
 auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Position, Velocity>();
+    auto view = reg.view<Position, const Velocity>();
 
     for(auto [e, p, v]: view.each()) {
         p.x += v.x * dt;
         p.y += v.y * dt;
+    }
+}
+
+auto collision_system(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<Position, PolygonCollider>();
+
+    for(auto [e1, p1, c1]: view.each()) {
+        for(auto [e2, p2, c2]: view.each()) {
+            if(e1 != e2) {
+                auto col = collider_overlap(c1, p1, c2, p2);
+                if(col == CollisionType::Overlapping)
+                    std::cout << "OVERLAPPING\n";
+                // else
+                //     std::cout << "NO OVERLAP\n";
+            }
+        }
     }
 }
 

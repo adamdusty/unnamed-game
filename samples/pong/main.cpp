@@ -14,6 +14,8 @@ auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
     player_input_system(reg, dt);
     player_control_system(reg, dt);
     movement_system(reg, dt);
+    collision_system(reg, dt);
+    debug_system(reg, dt);
     render_system(reg, rend);
 }
 
@@ -41,12 +43,13 @@ auto main() -> int {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
 
-    create_paddle(reg, w * 0.9, h / 2);
+    // create_paddle(reg, w * 0.9, h / 2);
     create_ball(reg, w / 2.0f, h / 2.0f);
 
     auto p = create_paddle(reg, w * 0.1, h / 2);
     reg.emplace<Player>(p);
     reg.emplace<Input>(p);
+    reg.emplace<Debug>(p);
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 

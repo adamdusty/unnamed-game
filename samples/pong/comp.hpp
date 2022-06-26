@@ -12,6 +12,10 @@ struct Position {
     float y;
 };
 
+struct Debug {
+    int dummy;
+};
+
 struct Velocity {
     float x;
     float y;
@@ -32,5 +36,6 @@ struct Player {
 };
 
 struct DrawInfo {
-    std::array<float, 2> quad;
+    float width;
+    float height;
 };
