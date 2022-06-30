@@ -9,14 +9,13 @@
 
 namespace pong {
 
-auto run_systems(entt::registry &reg, float dt, SDL_Renderer *rend) -> void {
+auto run_systems(entt::registry &reg, float dt) -> void {
     input_system(reg, dt);
     player_input_system(reg, dt);
     player_control_system(reg, dt);
     movement_system(reg, dt);
     collision_system(reg, dt);
     debug_system(reg, dt);
-    render_system(reg, rend);
 }
 
 auto register_services() -> void {
@@ -39,6 +38,7 @@ auto main() -> int {
     SDL_Init(SDL_INIT_VIDEO);
     auto window =
         SDL_CreateWindow("title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_RESIZABLE);
+    RenderSystem render_system{window};
 
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
@@ -51,21 +51,20 @@ auto main() -> int {
     reg.emplace<Input>(p);
     reg.emplace<Debug>(p);
 
-    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
     bool quit = false;
     SDL_Event ev{};
 
     while(!quit) {
         t0 = std::chrono::high_resolution_clock::now();
-        run_systems(reg, dt, renderer);
+        run_systems(reg, dt);
+        render_system.run(reg, dt);
 
         t1 = std::chrono::high_resolution_clock::now();
         dt = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
         dt *= 0.000001;
     }
 
-    SDL_DestroyRenderer(renderer);
+    // SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;

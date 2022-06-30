@@ -16,10 +16,11 @@ auto box_collider(float x, float y, float w, float h, float rotation) -> Polygon
                            }};
 }
 
-auto collider_overlap(const PolygonCollider &col1,
-                      const Position &pos1,
-                      const PolygonCollider &col2,
-                      const Position &pos2) -> CollisionType {
+// TODO: Implement rotations
+auto collision_detection(const PolygonCollider &col1,
+                         const Transform &t1,
+                         const PolygonCollider &col2,
+                         const Transform &t2) -> CollisionType {
 
     // std::cout << "INPUT COLLIDER: " << col1.points.size() << '\n';
     std::vector<Point> col1_points{};
@@ -27,12 +28,12 @@ auto collider_overlap(const PolygonCollider &col1,
 
     // Get collider positions
     for(auto &p: col1.points) {
-        col1_points.emplace_back(Point{p.x + pos1.x, p.y + pos1.y});
+        col1_points.emplace_back(Point{p.x + t1.position.x, p.y + t1.position.y});
     }
 
     // Get collider positions
     for(auto &p: col2.points) {
-        col2_points.emplace_back(Point{p.x + pos2.x, p.y + pos2.y});
+        col2_points.emplace_back(Point{p.x + t2.position.x, p.y + t2.position.y});
     }
 
     // Check all axes from collider1
@@ -42,14 +43,12 @@ auto collider_overlap(const PolygonCollider &col1,
         Point projection_axis{-(col1_points.at(k).y - col1_points.at(i).y), col1_points.at(k).x - col1_points.at(i).x};
         float mag       = sqrtf(projection_axis.x * projection_axis.x + projection_axis.y * projection_axis.y);
         projection_axis = {projection_axis.x / mag, projection_axis.y / mag};
-        // fmt::print("({}, {})\n", projection_axis.x, projection_axis.y);
 
         float min1 = INFINITY;
         float max1 = -INFINITY;
 
         for(auto &p: col1_points) {
             float projection = p.x * projection_axis.x + p.y * projection_axis.y;
-            // fmt::print("{}\n", projection);
 
             min1 = std::min(min1, projection);
             max1 = std::max(max1, projection);
@@ -64,8 +63,6 @@ auto collider_overlap(const PolygonCollider &col1,
             min2 = std::min(min2, projection);
             max2 = std::max(max2, projection);
         }
-
-        // fmt::print("{} >= {} && {} >= {}\n", max2, min1, max1, min2);
 
         if(!(max2 >= min1 && max1 >= min2))
             return CollisionType::None;

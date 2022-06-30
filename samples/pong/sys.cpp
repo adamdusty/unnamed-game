@@ -3,23 +3,40 @@
 #include "collision.hpp"
 #include "fmt/format.h"
 #include <chrono>
-#include <iostream>
 
 namespace pong {
 
+RenderSystem::RenderSystem(SDL_Window *window) {
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+}
+
+auto RenderSystem::run(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<const DrawInfo, const Transform>();
+
+    SDL_RenderClear(renderer);
+
+    SDL_Rect rect{};
+
+    for(auto [e, d, t]: view.each()) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+        // rect.w = d.width;
+        // rect.h = d.height;
+        rect.x = t.position.x;
+        rect.y = t.position.y;
+        SDL_RenderFillRect(renderer, &rect);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    }
+
+    SDL_RenderPresent(renderer);
+}
+
+auto RenderSystem::cleanup() -> void {
+    SDL_DestroyRenderer(renderer);
+}
+
 auto debug_system(entt::registry &reg, float) -> void {
-    auto view = reg.view<Debug, PolygonCollider, Position>();
-
-    // for(auto e: view) {
-    //     auto &col = view.get<PolygonCollider>(e);
-    //     auto &pos = view.get<Position>(e);
-
-    //     fmt::print("POSITION: ({}, {})\n", pos.x, pos.y);
-    //     for(auto &p: col.points) {
-    //         Point adj{p.x + pos.x, p.y + pos.y};
-    //         fmt::print("POINT: ({}, {})\n", adj.x, adj.y);
-    //     }
-    // }
+    auto view = reg.view<Debug, PolygonCollider, Transform>();
 }
 
 auto player_control_system(entt::registry &reg, float dt) -> void {
@@ -63,27 +80,6 @@ auto player_input_system(entt::registry &reg, float dt) -> void {
     }
 }
 
-auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void {
-    auto view = reg.view<const DrawInfo, const Position>();
-
-    SDL_RenderClear(rend);
-
-    SDL_Rect rect{};
-
-    for(auto [e, d, p]: view.each()) {
-        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-
-        rect.w = d.width;
-        rect.h = d.height;
-        rect.x = p.x;
-        rect.y = p.y;
-        SDL_RenderFillRect(rend, &rect);
-        SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-    }
-
-    SDL_RenderPresent(rend);
-}
-
 auto physics_system(entt::registry &reg, float dt) -> void {}
 
 auto input_system(entt::registry &reg, float dt) -> void {
@@ -113,25 +109,21 @@ auto input_system(entt::registry &reg, float dt) -> void {
 }
 
 auto movement_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Position, const Velocity>();
+    auto view = reg.view<Transform, const Velocity>();
 
-    for(auto [e, p, v]: view.each()) {
-        p.x += v.x * dt;
-        p.y += v.y * dt;
+    for(auto [e, t, v]: view.each()) {
+        t.position.x += v.x * dt;
+        t.position.y += v.y * dt;
     }
 }
 
 auto collision_system(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<Position, PolygonCollider>();
+    auto view = reg.view<Transform, PolygonCollider>();
 
-    for(auto [e1, p1, c1]: view.each()) {
-        for(auto [e2, p2, c2]: view.each()) {
+    for(auto [e1, t1, c1]: view.each()) {
+        for(auto [e2, t2, c2]: view.each()) {
             if(e1 != e2) {
-                auto col = collider_overlap(c1, p1, c2, p2);
-                if(col == CollisionType::Overlapping)
-                    std::cout << "OVERLAPPING\n";
-                // else
-                //     std::cout << "NO OVERLAP\n";
+                auto col = collision_detection(c1, t1, c2, t2);
             }
         }
     }

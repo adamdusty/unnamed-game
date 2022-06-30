@@ -2,7 +2,6 @@
 
 #include "comp.hpp"
 #include "utils.hpp"
-#include <iostream>
 #include <vector>
 
 namespace pong {
@@ -22,9 +21,11 @@ struct PolygonCollider {
 
 auto box_collider(float x, float y, float w, float h, float rotation = 0.0f) -> PolygonCollider;
 
-auto collider_overlap(const PolygonCollider &col1,
-                      const Position &pos1,
-                      const PolygonCollider &col2,
-                      const Position &pos2) -> CollisionType;
+auto collision_detection(const PolygonCollider &col1,
+                         const Transform &pos1,
+                         const PolygonCollider &col2,
+                         const Transform &pos2) -> CollisionType;
+
+// TODO: collision_resolution
 
 } // namespace pong

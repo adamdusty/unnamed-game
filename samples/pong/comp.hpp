@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL.h"
+#include "SDL2/SDL_image.h"
 #include "entt/entt.hpp"
 #include <array>
 #include <functional>
@@ -10,6 +11,11 @@
 struct Position {
     float x;
     float y;
+};
+
+struct Transform {
+    Position position;
+    float rotation;
 };
 
 struct Debug {
@@ -36,6 +42,5 @@ struct Player {
 };
 
 struct DrawInfo {
-    float width;
-    float height;
+    float x;
 };

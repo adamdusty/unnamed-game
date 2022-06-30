@@ -5,8 +5,16 @@
 
 namespace pong {
 
+struct RenderSystem {
+
+    RenderSystem(SDL_Window *window);
+    auto run(entt::registry &reg, float dt) -> void;
+    auto cleanup() -> void;
+
+    SDL_Renderer *renderer;
+};
+
 auto player_input_system(entt::registry &reg, float dt) -> void;
-auto render_system(entt::registry &reg, SDL_Renderer *rend) -> void;
 auto input_system(entt::registry &reg, float dt) -> void;
 auto player_control_system(entt::registry &reg, float dt) -> void;
 auto movement_system(entt::registry &reg, float dt) -> void;
