@@ -20,9 +20,9 @@ auto run_systems(entt::registry &reg, float dt) -> void {
     debug_system(reg, dt);
 }
 
-auto register_services() -> void {
-    // entt::locator<b2World>::emplace(b2Vec2(0.0f, 0.0f));
-}
+// auto register_services() -> void {
+//     entt::locator<RenderSystem>::emplace();
+// }
 
 } // namespace pong
 
@@ -33,14 +33,14 @@ auto main() -> int {
     auto t1  = std::chrono::high_resolution_clock::now();
     float dt = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
-    register_services();
+    // register_services();
 
     auto reg = entt::registry{};
 
     SDL_Init(SDL_INIT_VIDEO);
     auto window =
         SDL_CreateWindow("title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_RESIZABLE);
-    RenderSystem render_system{window};
+    entt::locator<RenderSystem>::emplace(RenderSystem{window});
 
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
@@ -59,7 +59,7 @@ auto main() -> int {
     while(!quit) {
         t0 = std::chrono::high_resolution_clock::now();
         run_systems(reg, dt);
-        render_system.run(reg, dt);
+        entt::locator<RenderSystem>::value().run(reg, dt);
 
         t1 = std::chrono::high_resolution_clock::now();
         dt = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();

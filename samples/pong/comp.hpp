@@ -4,6 +4,7 @@
 #include "SDL2/SDL_image.h"
 #include "entt/entt.hpp"
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -25,6 +26,7 @@ struct Debug {
 struct Velocity {
     float x;
     float y;
+    float rotational;
 };
 
 struct Input {
@@ -42,6 +44,7 @@ struct Player {
 };
 
 struct DrawInfo {
-    float x;
-    float y;
+    uint32_t texture;
+    uint32_t width;
+    uint32_t height;
 };

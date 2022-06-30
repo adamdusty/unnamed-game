@@ -10,28 +10,45 @@ RenderSystem::RenderSystem(SDL_Window *window) {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
+auto RenderSystem::create_texture(const Image &img) -> uint32_t {
+    auto surface = SDL_CreateRGBSurfaceFrom(
+        img.data.get(), img.width, img.height, img.depth, img.pitch, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_FreeSurface(surface);
+
+    texture_map.insert({next_texture, texture});
+    return next_texture++;
+}
+
 auto RenderSystem::run(entt::registry &reg, float dt) -> void {
     auto view = reg.view<const DrawInfo, const Transform>();
 
     SDL_RenderClear(renderer);
 
-    SDL_Rect rect{};
+    SDL_Rect src_rect{};
+    SDL_Rect dst_rect{};
 
     for(auto [e, d, t]: view.each()) {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        dst_rect.x = t.position.x;
+        dst_rect.y = t.position.y;
+        dst_rect.w = d.width;
+        dst_rect.h = d.height;
+        center.x   = t.position.x;
+        center.y   = t.position.y;
 
-        // rect.w = d.width;
-        // rect.h = d.height;
-        rect.x = t.position.x;
-        rect.y = t.position.y;
-        SDL_RenderFillRect(renderer, &rect);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderCopyEx(renderer, texture_map.at(d.texture), nullptr, &dst_rect, t.rotation, nullptr, SDL_FLIP_NONE);
     }
 
     SDL_RenderPresent(renderer);
 }
 
 auto RenderSystem::cleanup() -> void {
+    for(auto [k, v]: texture_map) {
+        SDL_DestroyTexture(v);
+    }
+    texture_map.clear();
     SDL_DestroyRenderer(renderer);
 }
 
@@ -43,7 +60,8 @@ auto player_control_system(entt::registry &reg, float dt) -> void {
     auto view = reg.view<const Player, Velocity>();
 
     for(auto [e, p, v]: view.each()) {
-        v.y = p.axis_input.at(1) * 256;
+        v.y          = p.axis_input.at(1) * 256;
+        v.rotational = p.axis_input.at(0) * 32;
     }
 }
 
@@ -58,6 +76,12 @@ auto player_input_system(entt::registry &reg, float dt) -> void {
                 break;
             case SDL_SCANCODE_S:
                 p.axis_input.at(1) = 1;
+                break;
+            case SDL_SCANCODE_D:
+                p.axis_input.at(0) = 1;
+                break;
+            case SDL_SCANCODE_A:
+                p.axis_input.at(0) = -1;
                 break;
             default:
                 break;
@@ -114,6 +138,7 @@ auto movement_system(entt::registry &reg, float dt) -> void {
     for(auto [e, t, v]: view.each()) {
         t.position.x += v.x * dt;
         t.position.y += v.y * dt;
+        t.rotation += v.rotational * dt;
     }
 }
 
