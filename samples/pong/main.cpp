@@ -5,6 +5,8 @@
 #include "comp.hpp"
 #include "entt/entt.hpp"
 #include "factories.hpp"
+#include "fmt/format.h"
+#include "image.h"
 #include "sys.hpp"
 
 namespace pong {

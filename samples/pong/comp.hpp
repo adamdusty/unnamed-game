@@ -43,4 +43,5 @@ struct Player {
 
 struct DrawInfo {
     float x;
+    float y;
 };
