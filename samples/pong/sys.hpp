@@ -2,18 +2,33 @@
 
 #include "comp.hpp"
 #include "entt/entt.hpp"
-#include "image.h"
+#include "image.hpp"
+#include "render.hpp"
 #include <cstdint>
 #include <unordered_map>
 
 namespace pong {
 
-struct RenderSystem {
+struct SDLRenderSystem : public RenderSystem {
 
-    RenderSystem(SDL_Window *window);
-    auto run(entt::registry &reg, float dt) -> void;
-    auto cleanup() -> void;
-    auto create_texture(const Image &img) -> uint32_t;
+    SDLRenderSystem(SDL_Window *window);
+    ~SDLRenderSystem();
+
+    SDLRenderSystem(const SDLRenderSystem &other)            = delete; // Copy constructor
+    SDLRenderSystem &operator=(const SDLRenderSystem &other) = delete; // Copy assignment operator
+
+    SDLRenderSystem(SDLRenderSystem &&other) noexcept :
+        renderer(std::exchange(other.renderer, nullptr)), texture_map(std::move(other.texture_map)),
+        next_texture(other.next_texture) {}
+    SDLRenderSystem &operator=(SDLRenderSystem &&other) noexcept {
+        std::swap(renderer, other.renderer);
+        std::swap(texture_map, other.texture_map);
+        next_texture = other.next_texture;
+        return *this;
+    }
+
+    auto execute(entt::registry &reg, float dt) -> void override;
+    auto create_texture(const Image &img) -> uint32_t override;
 
     SDL_Renderer *renderer;
     std::unordered_map<uint32_t, SDL_Texture *> texture_map;

@@ -6,11 +6,20 @@
 
 namespace pong {
 
-RenderSystem::RenderSystem(SDL_Window *window) {
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+SDLRenderSystem::SDLRenderSystem(SDL_Window *window) {
+    next_texture = 0;
+    renderer     = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
-auto RenderSystem::create_texture(const Image &img) -> uint32_t {
+SDLRenderSystem::~SDLRenderSystem() {
+    for(auto [k, v]: texture_map) {
+        SDL_DestroyTexture(v);
+    }
+    texture_map.clear();
+    SDL_DestroyRenderer(renderer);
+}
+
+auto SDLRenderSystem::create_texture(const Image &img) -> uint32_t {
     auto surface = SDL_CreateRGBSurfaceFrom(
         img.data.get(), img.width, img.height, img.depth, img.pitch, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 
@@ -22,9 +31,10 @@ auto RenderSystem::create_texture(const Image &img) -> uint32_t {
     return next_texture++;
 }
 
-auto RenderSystem::run(entt::registry &reg, float dt) -> void {
-    auto view = reg.view<const DrawInfo, const Transform>();
+auto SDLRenderSystem::execute(entt::registry &reg, float dt) -> void {
+    auto view = reg.view<const SDLDrawInfo, const Transform>();
 
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
     SDL_Rect src_rect{};
@@ -35,21 +45,25 @@ auto RenderSystem::run(entt::registry &reg, float dt) -> void {
         dst_rect.y = t.position.y;
         dst_rect.w = d.width;
         dst_rect.h = d.height;
-        center.x   = t.position.x;
-        center.y   = t.position.y;
 
         SDL_RenderCopyEx(renderer, texture_map.at(d.texture), nullptr, &dst_rect, t.rotation, nullptr, SDL_FLIP_NONE);
     }
 
-    SDL_RenderPresent(renderer);
-}
+    auto debug_view = reg.view<const PolygonCollider, const Transform>();
 
-auto RenderSystem::cleanup() -> void {
-    for(auto [k, v]: texture_map) {
-        SDL_DestroyTexture(v);
+    std::vector<SDL_FPoint> points{};
+    // std::vector<SDL_FPoint> points{{250, 250}, {1000, 250}};
+    for(auto [e, c, t]: debug_view.each()) {
+        for(size_t i = 0; i < c.points.size() + 1; i++) {
+            auto p = c.points.at(i % c.points.size());
+            points.emplace_back(SDL_FPoint{p.x + t.position.x, p.y + t.position.y});
+        }
+
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderDrawLinesF(renderer, points.data(), points.size());
     }
-    texture_map.clear();
-    SDL_DestroyRenderer(renderer);
+
+    SDL_RenderPresent(renderer);
 }
 
 auto debug_system(entt::registry &reg, float) -> void {
@@ -76,12 +90,6 @@ auto player_input_system(entt::registry &reg, float dt) -> void {
                 break;
             case SDL_SCANCODE_S:
                 p.axis_input.at(1) = 1;
-                break;
-            case SDL_SCANCODE_D:
-                p.axis_input.at(0) = 1;
-                break;
-            case SDL_SCANCODE_A:
-                p.axis_input.at(0) = -1;
                 break;
             default:
                 break;

@@ -1,12 +1,11 @@
 #include <chrono>
-#include <iostream>
 
 #include "SDL.h"
 #include "comp.hpp"
 #include "entt/entt.hpp"
 #include "factories.hpp"
 #include "fmt/format.h"
-#include "image.h"
+#include "image.hpp"
 #include "sys.hpp"
 
 namespace pong {
@@ -40,7 +39,7 @@ auto main() -> int {
     SDL_Init(SDL_INIT_VIDEO);
     auto window =
         SDL_CreateWindow("title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_RESIZABLE);
-    entt::locator<RenderSystem>::emplace(RenderSystem{window});
+    entt::locator<RenderSystem>::emplace<SDLRenderSystem>(window);
 
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
@@ -59,7 +58,7 @@ auto main() -> int {
     while(!quit) {
         t0 = std::chrono::high_resolution_clock::now();
         run_systems(reg, dt);
-        entt::locator<RenderSystem>::value().run(reg, dt);
+        entt::locator<RenderSystem>::value().execute(reg, dt);
 
         t1 = std::chrono::high_resolution_clock::now();
         dt = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();

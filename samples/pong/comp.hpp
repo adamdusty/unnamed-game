@@ -43,8 +43,13 @@ struct Player {
     std::array<float, 2> axis_input;
 };
 
-struct DrawInfo {
+struct SDLDrawInfo {
     uint32_t texture;
     uint32_t width;
     uint32_t height;
 };
+
+// Paddle
+//  - Transform
+//  - Velocity
+//  - Texture

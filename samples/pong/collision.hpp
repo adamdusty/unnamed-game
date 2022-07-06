@@ -17,6 +17,8 @@ struct PolygonCollider {
     float offset_y;
     float rotation;
     std::vector<Point> points;
+
+    auto get_bounding_box() const -> std::vector<Point>;
 };
 
 auto box_collider(float x, float y, float w, float h, float rotation = 0.0f) -> PolygonCollider;

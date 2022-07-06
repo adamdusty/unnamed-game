@@ -1,4 +1,4 @@
-#include "image.h"
+#include "image.hpp"
 
 #include "fmt/format.h"
 #include "stb_image.h"
