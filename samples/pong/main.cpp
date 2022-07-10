@@ -1,6 +1,7 @@
 #include <chrono>
 
 #include "SDL.h"
+#include "SDL_syswm.h"
 #include "comp.hpp"
 #include "entt/entt.hpp"
 #include "factories.hpp"
@@ -16,12 +17,7 @@ auto run_systems(entt::registry &reg, float dt) -> void {
     player_control_system(reg, dt);
     movement_system(reg, dt);
     collision_system(reg, dt);
-    debug_system(reg, dt);
 }
-
-// auto register_services() -> void {
-//     entt::locator<RenderSystem>::emplace();
-// }
 
 } // namespace pong
 

@@ -8,4 +8,4 @@ add_executable(pong
 )
 
 target_include_directories(pong PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pong)
-target_link_libraries(pong PUBLIC EnTT::EnTT SDL2::SDL2 fmt)
+target_link_libraries(pong PUBLIC EnTT::EnTT SDL2::SDL2 fmt LLGL)

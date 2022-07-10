@@ -20,8 +20,8 @@ SDLRenderSystem::~SDLRenderSystem() {
 }
 
 auto SDLRenderSystem::create_texture(const Image &img) -> uint32_t {
-    auto surface = SDL_CreateRGBSurfaceFrom(
-        img.data.get(), img.width, img.height, img.depth, img.pitch, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    auto surface = SDL_CreateRGBSurfaceWithFormatFrom(
+        img.data.get(), img.width, img.height, img.depth, img.pitch, SDL_PIXELFORMAT_RGBA32);
 
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
