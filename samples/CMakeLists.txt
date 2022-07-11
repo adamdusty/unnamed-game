@@ -9,3 +9,17 @@ add_executable(pong
 
 target_include_directories(pong PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pong)
 target_link_libraries(pong PUBLIC EnTT::EnTT SDL2::SDL2 fmt LLGL)
+
+add_library(plugin SHARED
+    ${CMAKE_CURRENT_SOURCE_DIR}/plugin/plugin.cpp
+)
+
+target_include_directories(plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/plugin)
+target_link_libraries(plugin PUBLIC sdk)
+
+add_executable(plugin_test
+    ${CMAKE_CURRENT_SOURCE_DIR}/plugin/main.cpp
+)
+
+target_include_directories(plugin_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/plugin)
+target_link_libraries(plugin_test PUBLIC sdk fmt)

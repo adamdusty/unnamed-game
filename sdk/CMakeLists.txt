@@ -5,9 +5,13 @@ project(
     VERSION 0.0.1
 )
 
-add_library(sdk
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ecs.cpp
-)
+if(UNIX AND NOT APPLE)
+    set(SDK_SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin_linux.cpp
+    )
+endif()
+
+add_library(sdk ${SDK_SRC})
 
 target_link_libraries(sdk PUBLIC EnTT::EnTT)
 
