@@ -1,5 +1,5 @@
 #include "sdk.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <fmt/format.h>
 
 namespace rp {

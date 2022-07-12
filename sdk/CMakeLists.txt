@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.20)
 
 project(
     sdk
@@ -8,6 +8,12 @@ project(
 if(UNIX AND NOT APPLE)
     set(SDK_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin_linux.cpp
+    )
+endif()
+
+if(WIN32)
+    set(SDK_SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/plugin.cpp
     )
 endif()
 
@@ -29,4 +35,11 @@ target_include_directories(sdk
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_options(sdk PRIVATE -Wall -Wextra -Wconversion)
+
+if(MSVC)
+    target_compile_options(sdk PRIVATE /utf-8 /W4 /permissive- /volatile:iso /Zc:preprocessor /EHsc /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew)
+endif()
+
+if(UNIX AND NOT APPLE)
+    target_compile_options(sdk PRIVATE -Wall -Wextra -Wconversion)
+endif()

@@ -7,7 +7,7 @@
 
 #include "entt/entt.hpp"
 #include "system.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 namespace ung {
 namespace sdk {

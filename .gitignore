@@ -1,5 +1,13 @@
-.vscode/
 build/
+.vscode/
+.idea/
+.vs/
+build/
+cmake/open-cpp-coverage.cmake
+cmake-build-*/
+prefix/
+CMakeLists.txt.user
+CMakeUserPresets.json
 
 # Prerequisites
 *.d
