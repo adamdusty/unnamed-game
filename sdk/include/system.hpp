@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include <SDL2/SDL.h>
 
 namespace ung {
 namespace sdk {
@@ -8,7 +9,7 @@ namespace sdk {
 struct System {
     virtual ~System() {}
 
-    virtual auto init(entt::registry &reg) -> void              = 0;
+    virtual auto init(SDL_Window *window) -> void               = 0;
     virtual auto execute(entt::registry &reg, float dt) -> void = 0;
 };
 

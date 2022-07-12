@@ -13,7 +13,13 @@ endif()
 
 add_library(sdk ${SDK_SRC})
 
-target_link_libraries(sdk PUBLIC EnTT::EnTT fmt)
+target_link_libraries(sdk
+    PUBLIC 
+        EnTT::EnTT
+        SDL2::SDL2
+    PRIVATE
+        fmt
+)
 
 target_include_directories(sdk
     PUBLIC

@@ -31,5 +31,13 @@ auto PluginService::load_plugin(const char *path) -> void {
     this->plugins.emplace_back(load_plugin());
 }
 
+auto PluginService::initialize_plugins(SDL_Window *window) -> void {
+    for(auto &p: this->plugins) {
+        for(auto &sys: p.systems) {
+            sys->init(window);
+        }
+    }
+}
+
 } // namespace sdk
 } // namespace ung
