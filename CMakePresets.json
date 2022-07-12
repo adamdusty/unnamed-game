@@ -8,7 +8,7 @@
     "configurePresets": [
         {
             "name": "default",
-            "generator": "Ninja",
+            "generator": "Unix Makefiles",
             "cacheVariables": {
                 "OpenGL_GL_PREFERENCE": "GLVND",
                 "CMAKE_BUILD_TYPE": "Debug",

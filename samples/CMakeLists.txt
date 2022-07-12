@@ -16,6 +16,7 @@ add_library(plugin SHARED
 
 target_include_directories(plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/plugin)
 target_link_libraries(plugin PUBLIC sdk)
+set_target_properties(plugin PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(plugin_test
     ${CMAKE_CURRENT_SOURCE_DIR}/plugin/main.cpp
