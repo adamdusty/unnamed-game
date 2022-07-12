@@ -20,7 +20,13 @@ struct Plugin {
     std::vector<std::unique_ptr<System>> systems;
 };
 
-auto load_plugin(const char *path) -> std::unique_ptr<Plugin>;
+struct PluginService {
+    ~PluginService();
+    auto load_plugin(const char *path) -> void;
+
+    std::vector<Plugin> plugins;
+    std::vector<void *> plugin_libs;
+};
 
 } // namespace sdk
 } // namespace ung

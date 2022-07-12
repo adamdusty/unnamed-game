@@ -13,7 +13,7 @@ endif()
 
 add_library(sdk ${SDK_SRC})
 
-target_link_libraries(sdk PUBLIC EnTT::EnTT)
+target_link_libraries(sdk PUBLIC EnTT::EnTT fmt)
 
 target_include_directories(sdk
     PUBLIC
@@ -23,4 +23,4 @@ target_include_directories(sdk
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_options(sdk INTERFACE -Wall -Wextra -Wconversion)
+target_compile_options(sdk PRIVATE -Wall -Wextra -Wconversion)
