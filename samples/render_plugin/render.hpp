@@ -2,10 +2,11 @@
 #include <SDL.h>
 #include <fmt/format.h>
 
-namespace rp {
-using namespace ung::sdk;
+// #include "render_plugin_export.h"
 
-extern "C" auto load_plugin() -> Plugin;
+using namespace ung::sdk;
+namespace rp {
+extern "C" __declspec(dllexport) auto load_plugin() -> Plugin;
 
 struct RenderSystem : public System {
     ~RenderSystem() { SDL_DestroyRenderer(renderer); }
@@ -24,5 +25,4 @@ struct RenderSystem : public System {
 
     SDL_Renderer *renderer;
 };
-
 } // namespace rp

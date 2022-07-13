@@ -1,59 +1,54 @@
 {
-    "version": 3,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 20,
-        "patch": 0
-    },
-    "configurePresets": [
-        {
-          "name": "dev",
-          "hidden": true,
-            "cacheVariables": {
-                "OpenGL_GL_PREFERENCE": "GLVND",
-                "CMAKE_C_STANDARD": "11",
-                "CMAKE_CXX_STANDARD": "17",
-                "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/lib",
-                "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/lib",
-                "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/bin",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
-        },
-      {
-        "name": "debug",
-        "inherits": "dev",
-        "hidden": true,
-        "displayName": "Debug Config",
-        "binaryDir": "${sourceDir}/build/debug",
-        "cacheVariables": {
-          "CMAKE_BUILD_TYPE": "Debug",
-          "LLGL_ENABLE_DEBUG_LAYER": "ON"
-        }
-      },
-      {
-        "name": "debug-unix",
-        "inherits": "debug",
-        "generator": "Unix Makefiles",
-        "cacheVariables": {
-          "CMAKE_CXX_COMPILER": "g++",
-          "CMAKE_C_COMPILER": "gcc",
-          "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wshadow -Wformat=2 -Wundef -Werror=float-equal"
-        }
-
-      },
-      {
-        "name": "debug-windows",
-        "inherits": "debug",
-        "generator": "Ninja",
-        "cacheVariables": {
-        }
-
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "hidden": true,
+      "cacheVariables": {
+        "OpenGL_GL_PREFERENCE": "GLVND",
+        "CMAKE_C_STANDARD": "11",
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/lib",
+        "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/lib",
+        "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}/bin",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
-    ],
-    "buildPresets": [
-        {
-            "name": "debug",
-            "configurePreset": "debug"
-        }
-    ]
+    },
+    {
+      "name": "debug",
+      "inherits": "dev",
+      "hidden": true,
+      "displayName": "Debug Config",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "LLGL_ENABLE_DEBUG_LAYER": "ON"
+      }
+    },
+    {
+      "name": "debug-unix",
+      "inherits": "debug",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_C_COMPILER": "gcc"
+      }
+    },
+    {
+      "name": "debug-windows",
+      "inherits": "debug",
+      "cacheVariables": {}
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug-windows",
+      "configurePreset": "debug-windows"
+    }
+  ]
 }

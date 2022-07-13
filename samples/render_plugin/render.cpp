@@ -1,9 +1,7 @@
 #include "render.hpp"
 
 #include <sdk.hpp>
-
 namespace rp {
-
 auto load_plugin() -> Plugin {
     std::unique_ptr<System> render_sys = std::make_unique<RenderSystem>();
 
@@ -12,5 +10,4 @@ auto load_plugin() -> Plugin {
 
     return p;
 }
-
 } // namespace rp

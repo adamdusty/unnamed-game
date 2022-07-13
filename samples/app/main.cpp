@@ -1,6 +1,6 @@
 #include "sdk.hpp"
-#include <fmt/format.h>
 #include <SDL.h>
+#include <fmt/format.h>
 #undef main
 
 auto main() -> int {
@@ -12,7 +12,7 @@ auto main() -> int {
     auto window = SDL_CreateWindow(
         "Test Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_SHOWN);
 
-    plugin_service.load_plugin("D:\\Dev\\unnamed-game\\build\\debug-windows\\bin\\render_plugin.dll");
+    plugin_service.load_plugin("D:\\Dev\\unnamed-game\\build\\debug-windows\\bin\\Debug\\render_plugin.dll");
     plugin_service.initialize_plugins(window);
 
     auto reg = entt::registry{};

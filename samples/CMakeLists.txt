@@ -38,3 +38,6 @@ add_library(render_plugin SHARED
 target_include_directories(render_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/render_plugin)
 target_link_libraries(render_plugin PUBLIC sdk fmt)
 set_target_properties(render_plugin PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+include(GenerateExportHeader)
+generate_export_header(render_plugin)
