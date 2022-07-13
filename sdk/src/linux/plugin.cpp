@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "plugin.hpp"
 
 #include "fmt/format.h"
@@ -41,3 +43,5 @@ auto PluginService::initialize_plugins(SDL_Window *window) -> void {
 
 } // namespace sdk
 } // namespace ung
+
+#endif

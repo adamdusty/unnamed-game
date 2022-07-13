@@ -40,4 +40,13 @@ target_link_libraries(render_plugin PUBLIC sdk fmt)
 set_target_properties(render_plugin PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 include(GenerateExportHeader)
-generate_export_header(render_plugin)
+generate_export_header(
+    render_plugin
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/export/render_plugin/render_plugin_export.hpp
+)
+
+target_include_directories(
+    render_plugin SYSTEM
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)

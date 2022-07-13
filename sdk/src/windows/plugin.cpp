@@ -1,7 +1,9 @@
+#ifdef _WIN32
+
 #include "plugin.hpp"
 
-#include <windows.h>
 #include <fmt/format.h>
+#include <windows.h>
 
 namespace ung {
 namespace sdk {
@@ -15,14 +17,14 @@ PluginService::~PluginService() {
 
 auto PluginService::load_plugin(const char *path) -> void {
     auto lib = LoadLibraryA(path);
-    if (!lib) {
+    if(!lib) {
         fmt::print("ERROR LOADING LIB: {}", GetLastError());
         // TODO: Handle error
     }
     this->plugin_libs.emplace_back(lib);
 
     auto load_plugin = reinterpret_cast<Plugin (*)()>(GetProcAddress(lib, "load_plugin"));
-    if (load_plugin == nullptr) {
+    if(load_plugin == nullptr) {
         fmt::print("ERROR LOADING FUNC: {}", GetLastError());
         // TODO: Handle error
     }
@@ -38,5 +40,7 @@ auto PluginService::initialize_plugins(SDL_Window *window) -> void {
     }
 }
 
-}
-}
+} // namespace sdk
+} // namespace ung
+
+#endif

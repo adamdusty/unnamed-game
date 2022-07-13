@@ -2,6 +2,7 @@ build/
 .vscode/
 .idea/
 .vs/
+out/
 build/
 cmake/open-cpp-coverage.cmake
 cmake-build-*/
